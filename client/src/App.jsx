@@ -1,51 +1,68 @@
-import { useState } from 'react'
-import './App.css'
-import Card from './components/Card'
-import { InputBox } from './components/InputBox'
-
-function addBookHandler() {
-
-}
+import { useState, useEffect } from 'react';
+import './App.css';
+import Card from './components/Card';
+import { InputBox } from './components/InputBox';
+import { BooksList } from './components/BooksList';
+import axios from 'axios';
+import { CustomButton } from './components/Button';
 
 function App() {
-  const [bookName, setBookName] = useState('')
-  const [bookPrice, setBookPrice] = useState('')
-  return (
-    <>
-      <div className='bg-slate-300 h-screen'>
-        <h1>Book Website</h1>
-        <Card>
-          <div className="text-lg">
-            Add books
-          </div>
-          <div>
-            <InputBox
-              placeholder={`Book Name`}
-              onChnage={(e) => {
-                setBookName(e.target.value)
-                console.log(bookName);
-              }} />
+    const [bookName, setBookName] = useState('');
+    const [bookPrice, setBookPrice] = useState('');
+    const [books, setBooks] = useState([]);
 
-            <InputBox
-              placeholder={`Book Price`}
-              onChnage={(e) => {
-                setBookPrice(e.target.value)
-                console.log(bookPrice);
-              }} />
+    useEffect(() => {
+        fetchBooks(); // Properly invoking the fetch function
+    }, []);
 
-            <button 
-            type="button" 
-            class="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 mt-4"
-            onClick={addBookHandler}
-            >
-              Add Book
-            </button>
+    const fetchBooks = async () => {
+        try {
+            const response = await axios.get('http://127.0.0.1:8000/api/books/');
+            setBooks(response.data); // Ensure the data is set to state correctly
+        } catch (error) {
+            console.error('Error fetching books:', error);
+        }
+    };
 
-          </div>
-        </Card>
-      </div>
-    </>
-  )
+    const addBookHandler = async () => {
+        try {
+            const response = await axios.post('http://127.0.0.1:8000/api/books/create', {
+                title: bookName,
+                price: bookPrice,
+            });
+            setBooks([...books, response.data]); // Append the newly added book to the list
+            setBookName('');
+            setBookPrice('');
+        } catch (error) {
+            console.error('Error adding book:', error);
+        }
+    };
+
+    return (
+        <div className="bg-slate-300 h-screen flex flex-col items-center">
+            <h1 className="text-center text-xl font-bold">Book Website</h1>
+            <Card>
+                <div className="text-lg">Add a Book</div>
+                <div>
+                    <InputBox
+                        placeholder="Book Name"
+                        value={bookName}
+                        onChange={(e) => setBookName(e.target.value)}
+                    />
+                    <InputBox
+                        placeholder="Book Price"
+                        value={bookPrice}
+                        onChange={(e) => setBookPrice(e.target.value)}
+                    />
+                    <CustomButton name="Add Book" onClick={addBookHandler} />
+                </div>
+            </Card>
+            <div className=' w-[50%]'>
+                <h2 className="text-center mt-5 text-lg font-semibold">Books:</h2>
+                <BooksList books={books} setBooks={setBooks} />
+            </div>
+        </div>
+    );
 }
 
-export default App
+export default App;
