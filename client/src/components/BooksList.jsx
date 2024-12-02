@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 
 export const BooksList = ({ books, setBooks }) => {
     const [editableBookId, setEditableBookId] = useState(null);
@@ -14,7 +15,7 @@ export const BooksList = ({ books, setBooks }) => {
 
     const handleUpdate = async (id) => {
         try {
-            const response = await axios.put(`http://127.0.0.1:8000/api/books/${id}`, {
+            const response = await axios.put(`${BACKEND_URL}/api/books/${id}`, {
                 title: newTitle,
                 price: newPrice,
             });
@@ -32,7 +33,7 @@ export const BooksList = ({ books, setBooks }) => {
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`http://127.0.0.1:8000/api/books/${id}`);
+            await axios.delete(`${BACKEND_URL}/api/books/${id}`);
             setBooks(books.filter((book) => book.id !== id));
         } catch (error) {
             console.error('Error deleting book:', error);
